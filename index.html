@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商业财一体化平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.3/babel.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #d1d5db; }
+        @keyframes growUp {
+            from { height: 0; opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-grow { animation: growUp 0.8s ease-out forwards; transform-origin: bottom; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const Icon = ({ name, size = 16, className = "" }) => {
+            const icons = {
+                ChevronDown: '<path d="m6 9 6 6 6-6"/>',
+                ChevronUp: '<path d="m18 15-6-6-6 6"/>',
+                ChevronRight: '<path d="m9 18 6-6-6-6"/>',
+                Search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+                List: '<line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>',
+                LayoutDashboard: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+                ShoppingCart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+                Store: '<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h2v-4h6v4h2a2 2 0 0 0 2-2v-8"/><path d="M2 7h20v2a3 3 0 0 1-3 3 3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-3-3z"/>',
+                Truck: '<rect width="15" height="13" x="1" y="3" rx="2" ry="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="16.5" cy="18.5" r="2.5"/>',
+                Calculator: '<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+                Folder: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+                FileText: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>',
+                User: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+                Lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+                LogOut: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+                AlertTriangle: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>',
+                TrendingUp: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+                Box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+                Upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+                ArrowUp: '<path d="m18 15-6-6-6 6"/>',
+                ArrowDown: '<path d="m6 9 6 6 6-6"/>',
+                X: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+                Trash2: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+                CheckCircle: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+                MessageSquare: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+                Users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+                Shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'
+            };
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: icons[name] || '' }} />
+            );
+        };
+
+        const MENU_DATA = [
+            { id: 'dashboard', title: '经营看板', icon: 'LayoutDashboard', roles: ['admin', 'finance'] },
+            {
+                id: 'commodity-root', title: '商品', icon: 'Box', roles: ['admin', 'procurement', 'warehouse'],
+                children: [
+                    {
+                        id: 'commodity-list-folder', title: '商品列表', icon: 'Folder',
+                        children: [{ id: 'commodity-list', title: '商品明细', icon: 'FileText' }]
+                    },
+                    {
+                        id: 'commodity-add-folder', title: '添加商品', icon: 'Folder',
+                        children: [
+                            { id: 'add-cat', title: '选择商品分类', icon: 'FileText' },
+                            { id: 'add-info', title: '填写商品信息', icon: 'FileText' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'procurement-root', title: '采购', icon: 'ShoppingCart', roles: ['admin', 'procurement'],
+                children: [
+                    {
+                        id: 'procurement-mgr-folder', title: '采购管理', icon: 'Folder',
+                        children: [{ id: 'procurement-list', title: '订单执行明细', icon: 'FileText' }]
+                    },
+                    {
+                        id: 'procurement-apply-folder', title: '采购申请', icon: 'Folder',
+                        children: [
+                            {
+                                id: 'procurement-apply-sub', title: '审批节点', icon: 'Folder',
+                                children: [
+                                    { id: 'apply-pending', title: '待审批', icon: 'FileText' },
+                                    { id: 'apply-rejected', title: '不通过', icon: 'FileText' },
+                                    { id: 'apply-passed', title: '已通过', icon: 'FileText' },
+                                    { id: 'apply-inbound', title: '已入库', icon: 'FileText' }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'sales-root', title: '销售', icon: 'Store', roles: ['admin', 'procurement'],
+                children: [
+                    {
+                        id: 'sales-order-folder', title: '订单管理', icon: 'Folder',
+                        children: [
+                            {
+                                id: 'order-list-sub', title: '流水分类', icon: 'Folder',
+                                children: [
+                                    { id: 'order-normal', title: '普通订单', icon: 'FileText' },
+                                    { id: 'order-return', title: '退货订单', icon: 'FileText' }
+                                ]
+                            },
+                            { id: 'order-add', title: '添加订单', icon: 'FileText' }
+                        ]
+                    },
+                    { id: 'order-platform', title: '平台下单', icon: 'FileText' },
+                    { id: 'order-store', title: '门店发货', icon: 'FileText' }
+                ]
+            },
+            {
+                id: 'logistic-root', title: '物流与仓储', icon: 'Truck', roles: ['admin', 'warehouse'],
+                children: [
+                    { id: 'inbound', title: '入库管理', icon: 'FileText' },
+                    { id: 'freight', title: '运费管理', icon: 'FileText' }
+                ]
+            },
+            {
+                id: 'finance-root', title: '财务与风控', icon: 'Calculator', roles: ['admin', 'finance'],
+                children: [
+                    { id: 'rebate', title: '返点管理', icon: 'FileText' },
+                    { id: 'recon', title: '全盘汇总与对账', icon: 'FileText' },
+                    { id: 'risk', title: '异常风控', icon: 'FileText' },
+                    { id: 'profit', title: '盈利分析', icon: 'FileText' },
+                    { id: 'cashflow', title: '资金预测', icon: 'FileText' }
+                ]
+            },
+            {
+                id: 'service-root', title: '运营与客服', icon: 'MessageSquare', roles: ['admin', 'procurement', 'finance', 'warehouse'],
+                children: [
+                    { id: 'work-order', title: '异常工单中心', icon: 'FileText' }
+                ]
+            },
+            {
+                id: 'auth-root', title: '组织与权限', icon: 'Shield', roles: ['admin'],
+                children: [
+                    { id: 'user-mgr', title: '员工账号管理', icon: 'Users' },
+                    { id: 'role-mgr', title: '角色权限配置', icon: 'FileText' }
+                ]
+            }
+        ];
+
+        const ROLES = [
+            { id: 'admin', name: '超级管理员', defaultMenu: 'dashboard' },
+            { id: 'procurement', name: '采购专员', defaultMenu: 'apply-pending' },
+            { id: 'finance', name: '财务总监', defaultMenu: 'dashboard' },
+            { id: 'warehouse', name: '仓储主管', defaultMenu: 'inbound' }
+        ];
+
+        const formatMoney = (num) => {
+            if (num === null || num === undefined) return '-';
+            const prefix = num < 0 ? '-¥ ' : '¥ ';
+            return prefix + Math.abs(num).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        const MODULE_CONFIGS = {
+            'add-cat': {
+                title: '选择商品分类', filters: ['类目级别', '状态'],
+                columns: [{key:'id', label:'分类编号'}, {key:'name', label:'分类名称'}, {key:'level', label:'级别'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'CAT-001', name: '数码3C', level: '一级类目', status: '启用', statusColor: 'text-green-500', action: '选择' }]
+            },
+            'add-info': {
+                title: '填写商品信息', filters: ['信息完整度', '草稿状态'],
+                columns: [{key:'id', label:'草稿编号'}, {key:'date', label:'更新时间', sortable:true}, {key:'name', label:'商品名称'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'DRF-001', date: '2023-10-31 10:00', name: '未命名商品', status: '草稿', statusColor: 'text-gray-500', action: '编辑' }]
+            },
+            'apply-pending': {
+                title: '待审批', filters: ['创建日期', '供货厂商', '采购状态'],
+                columns: [{key:'id', label:'编号'}, {key:'date', label:'创建日期', sortable:true}, {key:'supplier', label:'供货厂商'}, {key:'amount', label:'总金额', sortable:true, isMoney:true}, {key:'reqDate', label:'需用日期', sortable:true}, {key:'creator', label:'创建人'}, {key:'approver', label:'审批人'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: '1000001', date: '2023-10-28 12:12', supplier: 'A供应商', amount: 9999.99, reqDate: '2023-11-05 12:00', creator: 'A员工', approver: 'B员工', status: '待审批', statusColor: 'text-gray-800', action: '审批' }]
+            },
+            'apply-rejected': {
+                title: '不通过', filters: ['创建日期', '供货厂商', '采购状态'],
+                columns: [{key:'id', label:'编号'}, {key:'date', label:'创建日期', sortable:true}, {key:'supplier', label:'供货厂商'}, {key:'amount', label:'总金额', sortable:true, isMoney:true}, {key:'reqDate', label:'需用日期', sortable:true}, {key:'creator', label:'创建人'}, {key:'approver', label:'审批人'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: '1000002', date: '2023-10-28 12:12', supplier: 'B供应商', amount: 15500.00, reqDate: '2023-11-02 09:00', creator: 'A员工', approver: 'C员工', status: '不通过', statusColor: 'text-red-500', action: '重新提交' }]
+            },
+            'apply-passed': {
+                title: '已通过', filters: ['创建日期', '供货厂商', '采购状态'],
+                columns: [{key:'id', label:'编号'}, {key:'date', label:'创建日期', sortable:true}, {key:'supplier', label:'供货厂商'}, {key:'amount', label:'总金额', sortable:true, isMoney:true}, {key:'reqDate', label:'需用日期', sortable:true}, {key:'creator', label:'创建人'}, {key:'approver', label:'审批人'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: '1000003', date: '2023-10-28 13:14', supplier: 'A供应商', amount: 9999.99, reqDate: '2023-11-05 12:00', creator: 'A员工', approver: 'B员工', status: '已通过', statusColor: 'text-yellow-600', action: '入库' }]
+            },
+            'apply-inbound': {
+                title: '已入库', filters: ['创建日期', '供货厂商', '采购状态'],
+                columns: [{key:'id', label:'编号'}, {key:'date', label:'创建日期', sortable:true}, {key:'supplier', label:'供货厂商'}, {key:'amount', label:'总金额', sortable:true, isMoney:true}, {key:'reqDate', label:'需用日期', sortable:true}, {key:'creator', label:'创建人'}, {key:'approver', label:'审批人'}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: '1000004', date: '2023-10-28 14:00', supplier: 'A供应商', amount: 9999.99, reqDate: '2023-11-05 12:00', creator: 'A员工', approver: 'B员工', status: '已入库', statusColor: 'text-blue-500', action: '详情' }]
+            },
+            'procurement-list': {
+                title: '采购管理', filters: ['采购日期', '供应商', '业务状态'],
+                columns: [{key:'id', label:'采购单号'}, {key:'date', label:'创建日期', sortable:true}, {key:'supplier', label:'供应商'}, {key:'sku', label:'SKU'}, {key:'qty', label:'数量'}, {key:'amount', label:'总金额', sortable:true, isMoney:true}, {key:'status', label:'业务状态'}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'PO-202310-001', date: '2023-10-01 14:00', supplier: '核心供应商A', sku: 'SKU-A001', qty: 100, amount: 30000.00, status: '已入库', statusColor: 'text-blue-500', action: '详情' },
+                    { id: 'PO-202310-024', date: '2023-10-05 09:30', supplier: '华南数码专供', sku: 'SKU-B002', qty: 500, amount: 85000.00, status: '运输中', statusColor: 'text-yellow-600', action: '催收' }
+                ]
+            },
+            'order-normal': {
+                title: '普通订单', filters: ['下单日期', '客户名称', '订单状态'],
+                columns: [{key:'id', label:'订单编号'}, {key:'date', label:'下单时间', sortable:true}, {key:'customer', label:'客户'}, {key:'sku', label:'商品明细'}, {key:'amount', label:'实付金额', sortable:true, isMoney:true}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'ORD-N-001', date: '2023-10-15 10:20', customer: '张三', sku: 'SKU-A001', amount: 500.00, status: '待发货', statusColor: 'text-blue-500', action: '发货' }]
+            },
+            'order-return': {
+                title: '退货订单', filters: ['申请日期', '客户名称', '退货状态'],
+                columns: [{key:'id', label:'退货单号'}, {key:'date', label:'申请时间', sortable:true}, {key:'ref', label:'关联订单'}, {key:'sku', label:'退回商品'}, {key:'amount', label:'应退金额', sortable:true, isMoney:true}, {key:'status', label:'状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'RTN-001', date: '2023-10-16 15:45', ref: 'ORD-N-001', sku: 'SKU-A001', amount: 500.00, status: '待入库', statusColor: 'text-red-500', action: '核验' }]
+            },
+            'order-platform': {
+                title: '平台下单', filters: ['下单日期', '平台类型', '交易状态'],
+                columns: [{key:'id', label:'订单号'}, {key:'date', label:'下单日期', sortable:true}, {key:'platform', label:'平台类型'}, {key:'sku', label:'SKU规格明细'}, {key:'amount', label:'订单金额', sortable:true, isMoney:true}, {key:'status', label:'交易状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'OD-202310-102', date: '2023-10-10 15:30', platform: '自营电商 APP', sku: 'SKU-A001', amount: 5000.00, status: '已付款', statusColor: 'text-green-500', action: '发货' }]
+            },
+            'order-store': {
+                title: '门店发货', filters: ['发货日期', '发货门店', '物流状态'],
+                columns: [{key:'id', label:'发货单号'}, {key:'date', label:'发货日期', sortable:true}, {key:'store', label:'发货门店'}, {key:'sku', label:'发货SKU'}, {key:'qty', label:'出库数量'}, {key:'status', label:'物流状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'SO-202310-102', date: '2023-10-10 16:00', store: '北京朝阳大悦城店', sku: 'SKU-A001', qty: 10, status: '已发货', statusColor: 'text-blue-500', action: '轨迹' }]
+            },
+            'inbound': {
+                title: '入库管理', filters: ['入库日期', '关联单号', '库房状态'],
+                columns: [{key:'id', label:'入库单号'}, {key:'date', label:'入库日期', sortable:true}, {key:'ref', label:'关联采购单'}, {key:'sku', label:'SKU规格明细'}, {key:'qty', label:'实收数量'}, {key:'status', label:'库房状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'IN-202310-001', date: '2023-10-02 10:00', ref: 'PO-202310-001', sku: 'SKU-A001', qty: 100, status: '已上架', statusColor: 'text-green-500', action: '详情' }]
+            },
+            'freight': {
+                title: '运费管理', filters: ['账单日期', '承运商', '对账状态'],
+                columns: [{key:'id', label:'物流单号'}, {key:'date', label:'生成日期', sortable:true}, {key:'carrier', label:'承运商'}, {key:'ref', label:'关联发货单'}, {key:'amount', label:'运费金额', sortable:true, isMoney:true}, {key:'status', label:'对账状态'}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'SF-202310-01992', date: '2023-10-11 16:00', carrier: '顺丰速运', ref: 'SO-202310-102', amount: 15.00, status: '已核对', statusColor: 'text-green-500', action: '详情' },
+                    { id: 'ZT-202310-08831', date: '2023-10-13 11:20', carrier: '中通快递', ref: 'SO-202310-105', amount: 45.00, status: '异常超重', statusColor: 'text-red-500', action: '复核' }
+                ]
+            },
+            'rebate': {
+                title: '返点管理', filters: ['核算月份', '供应商', '核算状态'],
+                columns: [{key:'id', label:'核算批次'}, {key:'date', label:'结算基准日', sortable:true}, {key:'supplier', label:'供应商名称'}, {key:'base', label:'基准销售额', isMoney:true}, {key:'amount', label:'应收返点', sortable:true, isMoney:true}, {key:'status', label:'核算状态'}, {key:'action', label:'操作'}],
+                data: [{ id: 'RB-202310-A', date: '2023-10-31 23:59', supplier: '核心供应商A', base: 100000.00, amount: 5000.00, status: '已生效', statusColor: 'text-green-500', action: '明细' }]
+            },
+            'risk': {
+                title: '异常风控', filters: ['预警日期', '异常类型', '处理状态'],
+                columns: [{key:'id', label:'风控单号'}, {key:'date', label:'触发时间', sortable:true}, {key:'type', label:'异常类型'}, {key:'ref', label:'关联业务单据'}, {key:'amount', label:'涉及金额', sortable:true, isMoney:true}, {key:'status', label:'风控状态'}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'RK-2310-001', date: '2023-10-14 09:30', type: '运费超重预警', ref: 'SF-01992', amount: 40.00, status: '拦截付款', statusColor: 'text-red-500', action: '申诉' },
+                    { id: 'RK-2310-002', date: '2023-10-15 11:20', type: '退款未见入库', ref: 'OD-2310-103', amount: 1200.00, status: '待查明', statusColor: 'text-yellow-600', action: '定损' }
+                ]
+            },
+            'profit': {
+                title: '盈利分析', filters: ['分析周期', '品类', '评级'],
+                columns: [{key:'id', label:'SKU'}, {key:'name', label:'商品名称'}, {key:'sales', label:'销售总额', sortable:true, isMoney:true}, {key:'cost', label:'采购成本', isMoney:true}, {key:'loss', label:'隐性损耗', isMoney:true}, {key:'amount', label:'真实净利润', sortable:true, isMoney:true}, {key:'status', label:'系统评级'}, {key:'action', label:'操作'}],
+                data: [{ id: 'SKU-A001', name: '智能手机Pro', sales: 50000.00, cost: -30000.00, loss: -5000.00, amount: 15000.00, status: '高爆款', statusColor: 'text-gray-900', action: '趋势' }]
+            },
+            'cashflow': {
+                title: '资金预测', filters: ['预测区间', '资金类型', '进度'],
+                columns: [{key:'date', label:'划拨时间限制', sortable:true}, {key:'type', label:'资金动向'}, {key:'amount', label:'预计金额', sortable:true, isMoney:true}, {key:'ref', label:'交易链路'}, {key:'status', label:'当前进度'}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'CF-001', date: '2023-10-26 18:00', type: '支付采购尾款', amount: -55000.00, ref: '对公户 -> 供应商A', status: '加急办理', statusColor: 'text-red-500', action: '打款' },
+                    { id: 'CF-002', date: '2023-10-28 12:00', type: '平台账单结转', amount: 125000.00, ref: '自营电商APP -> 平台公户', status: '等待打款中', statusColor: 'text-yellow-600', action: '催办' },
+                    { id: 'CF-003', date: '2023-10-25 10:00', type: '垫付物流费', amount: -1200.00, ref: '对公户 -> 顺丰', status: '即将逾期', statusColor: 'text-red-500', action: '打款' }
+                ]
+            },
+            'work-order': {
+                title: '异常工单中心', filters: ['工单状态', '处理等级', '创建时间'],
+                columns: [{key:'id', label:'工单编号'}, {key:'date', label:'发起时间', sortable:true}, {key:'type', label:'工单类型'}, {key:'ref', label:'异常流水关联号'}, {key:'creator', label:'发起方'}, {key:'handler', label:'当前处理人'}, {key:'status', label:'工单进度'}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'WO-2310-001', date: '2023-10-15 14:30', type: '运费异常申诉', ref: 'SF-202310-01992', creator: '财务部', handler: '仓储部-李四', status: '待提供凭证', statusColor: 'text-red-500', action: '跟进' },
+                    { id: 'WO-2310-002', date: '2023-10-14 09:15', type: '人工调账审批', ref: 'OD-202310-102', creator: '对账系统', handler: '财务总监', status: '调账复核中', statusColor: 'text-blue-500', action: '审核' },
+                    { id: 'WO-2310-003', date: '2023-10-12 16:45', type: '退款未见入库', ref: 'OD-2310-103', creator: '客服系统', handler: '售后组', status: '已查实闭环', statusColor: 'text-green-500', action: '详情' }
+                ]
+            },
+            'user-mgr': {
+                title: '员工账号管理', filters: ['所属部门', '账号状态', '关联角色'],
+                columns: [{key:'id', label:'工号'}, {key:'name', label:'姓名'}, {key:'dept', label:'部门'}, {key:'role', label:'系统角色'}, {key:'status', label:'状态'}, {key:'lastLogin', label:'最后登录', sortable:true}, {key:'action', label:'操作'}],
+                data: [
+                    { id: 'EMP-001', name: '系统管理员', dept: '总办', role: '超级管理员', status: '正常', statusColor: 'text-green-500', lastLogin: '2023-10-28 15:30', action: '配置权限' },
+                    { id: 'EMP-023', name: '张三', dept: '采购部', role: '采购专员', status: '正常', statusColor: 'text-green-500', lastLogin: '2023-10-28 09:00', action: '配置权限' },
+                    { id: 'EMP-045', name: '李四', dept: '仓储部', role: '仓储主管', status: '正常', statusColor: 'text-green-500', lastLogin: '2023-10-27 18:20', action: '配置权限' },
+                    { id: 'EMP-088', name: '王五', dept: '财务部', role: '财务总监', status: '冻结', statusColor: 'text-red-500', lastLogin: '2023-09-15 10:00', action: '解冻' }
+                ]
+            }
+        };
+
+        const MOCK_COMMODITY_DATA = [
+            { id: '1000001', name: '银色星芒刺绣网纱底裤', brand: "Victoria's Secret", price: '100.00', sku: 'No86577', sort: 100, sales: 100, status: '已审核' },
+            { id: '1000002', name: '全棉透气运动袜套装', brand: "Nike", price: '129.00', sku: 'NK99201', sort: 95, sales: 340, status: '审核中' },
+            { id: '1000003', name: '无感无痕内衣经典款', brand: "Ubras", price: '159.00', sku: 'UB11029', sort: 90, sales: 520, status: '已审核' }
+        ];
+
+        // --- 组件 ---
+        const LoginScreen = ({ onLogin }) => {
+            const [selectedRole, setSelectedRole] = useState(ROLES[0]);
+            return (
+                <div className="flex h-screen bg-[#f0f2f5] items-center justify-center font-sans">
+                    <div className="w-[400px] bg-white border border-gray-200 rounded-sm shadow-lg p-8">
+                        <div className="text-center mb-8">
+                            <h1 className="text-2xl font-bold text-gray-800">电商业财一体化平台</h1>
+                        </div>
+                        <div className="space-y-5">
+                            <div className="relative">
+                                <label className="block text-sm text-gray-600 mb-1">选择登录角色</label>
+                                <select 
+                                    className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm"
+                                    value={selectedRole.id}
+                                    onChange={(e) => setSelectedRole(ROLES.find(r => r.id === e.target.value))}
+                                >
+                                    {ROLES.map(role => <option key={role.id} value={role.id}>{role.name}</option>)}
+                                </select>
+                            </div>
+                            <div className="relative">
+                                <Icon name="Lock" className="absolute left-3 top-9 text-gray-400" />
+                                <label className="block text-sm text-gray-600 mb-1">登录密码</label>
+                                <input type="password" placeholder="请输入密码" defaultValue="123456" className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-sm text-sm focus:outline-none focus:border-[#1890ff]" />
+                            </div>
+                            <button onClick={() => onLogin(selectedRole)} className="w-full bg-[#1890ff] text-white py-2 rounded-sm text-sm hover:bg-[#40a9ff] transition-colors mt-4">登 录</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const RoleManagerView = () => {
+            const [activeRoleId, setActiveRoleId] = useState(ROLES[0].id);
+            const [rolePermissions, setRolePermissions] = useState(() => {
+                const initial = {};
+                ROLES.forEach(r => {
+                    initial[r.id] = [];
+                    const traverse = (menus) => {
+                        menus.forEach(m => {
+                            if (!m.roles || m.roles.includes(r.id)) {
+                                initial[r.id].push(m.id);
+                                if (m.children) traverse(m.children);
+                            }
+                        });
+                    };
+                    traverse(MENU_DATA);
+                });
+                return initial;
+            });
+
+            const handleTogglePermission = (menuId) => {
+                setRolePermissions(prev => {
+                    const current = prev[activeRoleId] || [];
+                    const updated = current.includes(menuId)
+                        ? current.filter(id => id !== menuId)
+                        : [...current, menuId];
+                    return { ...prev, [activeRoleId]: updated };
+                });
+            };
+
+            const renderPermissionTree = (menus, level = 0) => {
+                return menus.map(menu => {
+                    const isChecked = (rolePermissions[activeRoleId] || []).includes(menu.id);
+                    return (
+                        <div key={menu.id} className="mb-3" style={{ paddingLeft: `${level * 24}px` }}>
+                            <label className="flex items-center space-x-2 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 accent-[#1890ff] border-gray-300 rounded-sm"
+                                    checked={isChecked}
+                                    onChange={() => handleTogglePermission(menu.id)}
+                                />
+                                <span className={`text-sm ${level === 0 ? 'font-bold text-gray-800' : 'text-gray-600 group-hover:text-[#1890ff]'}`}>
+                                    {menu.title}
+                                </span>
+                            </label>
+                            {menu.children && <div className="mt-2 border-l border-gray-100 ml-2 pl-2">
+                                {renderPermissionTree(menu.children, level + 1)}
+                            </div>}
+                        </div>
+                    );
+                });
+            };
+
+            return (
+                <div className="p-4 bg-[#f0f2f5] min-h-full font-sans flex space-x-4">
+                    <div className="w-1/3 bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col">
+                        <div className="px-4 py-3 border-b border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                            <span className="text-sm font-bold text-gray-700">系统角色列表</span>
+                            <button className="text-[#1890ff] text-xs hover:underline">新增角色</button>
+                        </div>
+                        <div className="flex-1 overflow-auto p-2 space-y-1">
+                            {ROLES.map(role => (
+                                <div
+                                    key={role.id}
+                                    onClick={() => setActiveRoleId(role.id)}
+                                    className={`p-3 rounded-sm cursor-pointer text-sm transition-colors border-l-2 ${
+                                        activeRoleId === role.id
+                                            ? 'bg-blue-50 border-[#1890ff] text-[#1890ff] font-medium'
+                                            : 'border-transparent text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <span>{role.name}</span>
+                                        <span className="text-xs text-gray-400 font-mono">{role.id}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="w-2/3 bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col">
+                        <div className="px-4 py-3 border-b border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                            <span className="text-sm font-bold text-gray-700">
+                                菜单授权配置 - {ROLES.find(r => r.id === activeRoleId)?.name}
+                            </span>
+                            <button className="px-4 py-1.5 bg-[#1890ff] text-white rounded-sm text-xs hover:bg-[#40a9ff] transition-colors shadow-sm">
+                                保存配置
+                            </button>
+                        </div>
+                        <div className="p-6 flex-1 overflow-auto bg-white">
+                            {renderPermissionTree(MENU_DATA)}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ActionModal = ({ isOpen, actionType, rowData, onClose }) => {
+            if (!isOpen || !rowData) return null;
+            
+            const modalWidth = actionType === '趋势' ? 'w-[700px]' : 'w-[480px]';
+
+            const renderContent = () => {
+                switch(actionType) {
+                    case '配置权限':
+                        return (
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 text-gray-800 p-3 rounded-sm text-sm border border-gray-200">
+                                    为员工 <strong className="ml-1 text-[#1890ff]">{rowData.name} ({rowData.id})</strong> 配置系统角色
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-2">分配系统角色 (多选)</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <label className="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-sm hover:bg-blue-50"><input type="checkbox" className="accent-[#1890ff]" defaultChecked={rowData.role.includes('超级')} /><span className="text-sm">超级管理员</span></label>
+                                        <label className="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-sm hover:bg-blue-50"><input type="checkbox" className="accent-[#1890ff]" defaultChecked={rowData.role.includes('采购')} /><span className="text-sm">采购专员</span></label>
+                                        <label className="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-sm hover:bg-blue-50"><input type="checkbox" className="accent-[#1890ff]" defaultChecked={rowData.role.includes('财务')} /><span className="text-sm">财务总监</span></label>
+                                        <label className="flex items-center space-x-2 cursor-pointer p-2 border border-gray-200 rounded-sm hover:bg-blue-50"><input type="checkbox" className="accent-[#1890ff]" defaultChecked={rowData.role.includes('仓储')} /><span className="text-sm">仓储主管</span></label>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-orange-500 bg-orange-50 p-2 rounded-sm border border-orange-100 mt-4">
+                                    <Icon name="AlertTriangle" size={12} className="inline mr-1" />
+                                    权限变更将在用户下次登录时生效。
+                                </div>
+                            </div>
+                        );
+                    case '人工调账':
+                        return (
+                            <div className="space-y-4">
+                                <div className="bg-orange-50 text-orange-800 p-3 rounded-sm text-sm border border-orange-100">
+                                    处理单据: <strong className="ml-2 font-mono">{rowData.ref || 'OD-202310-102'}</strong>
+                                    <span className="ml-4">账单差异金额: <strong className="text-red-500 font-mono">¥ 120.00</strong></span>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-2">调账方向</label>
+                                    <div className="flex space-x-6 mb-2">
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="adj" className="accent-[#1890ff]" defaultChecked/>
+                                            <span className="text-sm">系统增加应收 (补平差异)</span>
+                                        </label>
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input type="radio" name="adj" className="accent-[#1890ff]"/>
+                                            <span className="text-sm">系统减少应收 (确认为资损)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">执行调账金额</label>
+                                    <input type="number" placeholder="¥ 0.00" defaultValue="120.00" className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">调账原因及备注 (必填)</label>
+                                    <textarea rows="3" placeholder="请填写调账依据，例如：平台扣除客诉赔偿费..." className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] resize-none text-sm"></textarea>
+                                </div>
+                                <div className="border border-dashed border-gray-300 rounded-sm p-4 text-center text-gray-500 cursor-pointer hover:bg-gray-50 hover:border-[#1890ff] transition-colors">
+                                    <Icon name="Upload" size={20} className="mx-auto mb-2 text-gray-400" />
+                                    <p className="text-xs">上传沟通记录截屏或责任判定书 (选填)</p>
+                                </div>
+                            </div>
+                        );
+                    case '运费申诉':
+                        return (
+                            <div className="space-y-4">
+                                <div className="bg-red-50 text-red-800 p-3 rounded-sm text-sm border border-red-100">
+                                    争议运单: <strong className="ml-2 font-mono">{rowData.ref || 'SF-202310-01992'}</strong>
+                                    <div className="mt-1">
+                                        系统预估: <span className="font-mono text-gray-600">¥ 15.00</span> | 
+                                        物流计费: <span className="font-mono text-gray-600">¥ 45.00</span> | 
+                                        <span className="font-bold ml-1 text-red-500">超额: ¥ 30.00</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">物流申诉理由</label>
+                                    <select className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm mb-3">
+                                        <option>实际重量未超标 (揽收网点称重失误)</option>
+                                        <option>体积重计算长宽高错误</option>
+                                        <option>协议首重/续重单价配置未生效</option>
+                                        <option>其他原因</option>
+                                    </select>
+                                    <textarea rows="3" placeholder="补充详细情况说明..." className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] resize-none text-sm"></textarea>
+                                </div>
+                                <div className="border border-dashed border-gray-300 rounded-sm p-4 text-center text-gray-500 cursor-pointer hover:bg-gray-50 hover:border-[#1890ff] transition-colors">
+                                    <Icon name="Upload" size={20} className="mx-auto mb-2 text-gray-400" />
+                                    <p className="text-xs">点击上传【复称照片】或【面单底单】(支持 jpg/png/pdf)</p>
+                                </div>
+                            </div>
+                        );
+                    case '趋势':
+                        const mockTrendData = [40, 65, 45, 90, 75, 85, 100];
+                        return (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-3 gap-4 text-center">
+                                    <div className="bg-blue-50 p-3 rounded-sm border border-blue-100">
+                                        <div className="text-gray-500 text-xs mb-1">近7天总销量</div>
+                                        <div className="text-xl font-bold font-mono text-[#1890ff]">3,240</div>
+                                    </div>
+                                    <div className="bg-green-50 p-3 rounded-sm border border-green-100">
+                                        <div className="text-gray-500 text-xs mb-1">环比增长率</div>
+                                        <div className="text-xl font-bold font-mono text-green-600">+12.5%</div>
+                                    </div>
+                                    <div className="bg-orange-50 p-3 rounded-sm border border-orange-100">
+                                        <div className="text-gray-500 text-xs mb-1">转化率异常预警</div>
+                                        <div className="text-xl font-bold font-mono text-orange-500">4.8%</div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-700 mb-4 border-l-4 border-[#1890ff] pl-2">7日销量波动曲线</h4>
+                                    <div className="relative h-48 border-b-2 border-l-2 border-gray-200 flex items-end justify-between px-4 pb-0 pt-4">
+                                        {mockTrendData.map((h, i) => (
+                                            <div key={i} className="relative w-10 bg-gradient-to-t from-blue-300 to-[#1890ff] rounded-t-sm hover:opacity-80 transition-all cursor-pointer group animate-grow" style={{ height: `${h}%` }}>
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap shadow-lg z-10">
+                                                    数值: {h * 15}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between px-6 pt-2 text-xs text-gray-400">
+                                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-sm border border-gray-100">
+                                    <Icon name="AlertTriangle" size={12} className="inline mr-1 text-orange-500" />
+                                    系统分析建议：该高爆款商品近期销量增速放缓，建议联动仓储模块核查安全库存水位，防止滞销积压。
+                                </div>
+                            </div>
+                        );
+                    case '打款':
+                    case '结算':
+                        return (
+                            <div className="space-y-4">
+                                <div className="bg-blue-50 text-blue-800 p-3 rounded-sm text-sm border border-blue-100">
+                                    资金划拨链路核对: <strong className="ml-2">{rowData.ref || rowData.id}</strong>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span className="text-gray-500">支付总额</span>
+                                    <span className="text-2xl font-bold font-mono text-red-600">{formatMoney(Math.abs(rowData.amount))}</span>
+                                </div>
+                                <div className="pt-2">
+                                    <label className="block text-sm text-gray-600 mb-1">选择付款账户</label>
+                                    <select className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm">
+                                        <option>工商银行对公户 尾号 8899</option>
+                                        <option>招商银行对公户 尾号 1234</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">财务授权密码</label>
+                                    <input type="password" placeholder="请输入操作密码" className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm" />
+                                </div>
+                            </div>
+                        );
+                    case '跟进':
+                    case '审核':
+                        return (
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 text-gray-800 p-3 rounded-sm text-sm border border-gray-200 flex justify-between">
+                                    <span>处理工单: <strong className="ml-1 font-mono">{rowData.id}</strong></span>
+                                    <span className="text-gray-500">业务类型: {rowData.type}</span>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-2">处理结果判定</label>
+                                    <select className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] text-sm mb-3">
+                                        <option>同意申诉 / 批准调账 (完结并扭转业务状态)</option>
+                                        <option>驳回请求 (维持原判定结论)</option>
+                                        <option>打回发起方 (要求补充相关举证材料)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">处理意见与内部备注</label>
+                                    <textarea rows="4" placeholder="输入处理结论及依据，该内容将同步至工单日志..." className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] resize-none text-sm"></textarea>
+                                </div>
+                            </div>
+                        );
+                    case '核验':
+                    case '解冻':
+                    case '冻结':
+                        return (
+                            <div className="space-y-4">
+                                <div className="flex space-x-6 mb-4">
+                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                        <input type="radio" name="audit" className="w-4 h-4 accent-[#1890ff]" defaultChecked />
+                                        <span className="text-gray-700 text-sm">确认操作</span>
+                                    </label>
+                                    <label className="flex items-center space-x-2 cursor-pointer">
+                                        <input type="radio" name="audit" className="w-4 h-4 accent-red-500" />
+                                        <span className="text-gray-700 text-sm">取消操作</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-1">办理意见</label>
+                                    <textarea rows="3" placeholder="请输入处理意见..." className="w-full border border-gray-300 p-2 rounded-sm focus:outline-none focus:border-[#1890ff] resize-none text-sm"></textarea>
+                                </div>
+                            </div>
+                        );
+                    default:
+                        return (
+                            <div className="space-y-4 text-sm text-gray-600">
+                                <p>您即将对单据 <strong className="text-gray-900 font-mono">{rowData.id}</strong> 执行 <strong className="text-[#1890ff]">{actionType}</strong> 操作。</p>
+                                <p>系统已记录您的操作标识，请确认业务无误后点击执行。</p>
+                            </div>
+                        );
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className={`bg-white rounded-sm shadow-2xl flex flex-col transition-all ${modalWidth}`}>
+                        <div className="flex justify-between items-center px-5 py-3 border-b border-gray-100 bg-[#fafafa]">
+                            <h3 className="font-bold text-gray-800 text-sm">业务处理 - {actionType}</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={16} /></button>
+                        </div>
+                        <div className="p-6">{renderContent()}</div>
+                        <div className="px-5 py-3 border-t border-gray-100 bg-[#fafafa] flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-1.5 bg-white border border-gray-300 rounded-sm text-sm text-gray-700 hover:bg-gray-50 transition-colors">关闭</button>
+                            {actionType !== '趋势' && <button onClick={onClose} className="px-4 py-1.5 bg-[#1890ff] rounded-sm text-sm text-white hover:bg-[#40a9ff] transition-colors">提交处理</button>}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ReconSummaryView = () => {
+            const [modalConfig, setModalConfig] = useState({ isOpen: false, actionType: '', rowData: null });
+            
+            const openModal = (type, refId) => setModalConfig({ isOpen: true, actionType: type, rowData: { ref: refId } });
+            const closeModal = () => setModalConfig({ isOpen: false, actionType: '', rowData: null });
+
+            return (
+                <div className="p-4 bg-[#f0f2f5] min-h-full font-sans text-gray-700 relative">
+                    <div className="bg-white border border-gray-200 rounded-sm mb-4 p-4 shadow-sm flex justify-between items-center">
+                        <div>
+                            <h2 className="text-base font-bold text-gray-800">全盘汇总与月底对账</h2>
+                            <p className="text-xs text-gray-500 mt-1">整合供、销、存、财流水，实现跨模块闭环核销与利润清算。</p>
+                        </div>
+                        <div className="flex space-x-3 items-center">
+                            <span className="text-sm text-gray-500">财务账期:</span>
+                            <select className="border border-gray-300 rounded-sm px-3 py-1.5 text-sm outline-none focus:border-[#1890ff]">
+                                <option>2023年10月 (本期)</option>
+                                <option>2023年09月 (已结)</option>
+                            </select>
+                            <button className="px-4 py-1.5 bg-[#1890ff] text-white rounded-sm hover:bg-[#40a9ff] text-sm transition-colors shadow-sm">锁定账单</button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-4 mb-4">
+                        <div className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm border-t-4 border-t-[#1890ff]">
+                            <div className="text-gray-500 text-xs mb-1">总计营收 (含退款)</div>
+                            <div className="text-xl font-bold font-mono text-gray-900">¥ 1,250,000.00</div>
+                        </div>
+                        <div className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm border-t-4 border-t-red-500">
+                            <div className="text-gray-500 text-xs mb-1">采购与物流成本</div>
+                            <div className="text-xl font-bold font-mono text-gray-900">¥ -895,000.00</div>
+                        </div>
+                        <div className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm border-t-4 border-t-orange-500">
+                            <div className="text-gray-500 text-xs mb-1">平台应收账款</div>
+                            <div className="text-xl font-bold font-mono text-gray-900">¥ 120,000.00</div>
+                        </div>
+                        <div className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm border-t-4 border-t-yellow-500">
+                            <div className="text-gray-500 text-xs mb-1">供应商应付账款</div>
+                            <div className="text-xl font-bold font-mono text-gray-900">¥ -85,000.00</div>
+                        </div>
+                        <div className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm border-t-4 border-t-green-500">
+                            <div className="text-gray-500 text-xs mb-1">账期结余预估</div>
+                            <div className="text-xl font-bold font-mono text-green-600">¥ 355,000.00</div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 h-[calc(100vh-270px)]">
+                        <div className="col-span-1 bg-white border border-gray-200 rounded-sm p-4 shadow-sm flex flex-col">
+                            <h3 className="text-sm font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">各模块核销进度</h3>
+                            <div className="space-y-6 flex-1">
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-600">采购单入库核对</span>
+                                        <span className="text-green-500 font-bold">100%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-green-500 h-2 rounded-full w-full"></div></div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-600">销售订单与收款匹配</span>
+                                        <span className="text-[#1890ff] font-bold">85%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-[#1890ff] h-2 rounded-full w-[85%]"></div></div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-600">运费账单差异复核</span>
+                                        <span className="text-orange-500 font-bold">42%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2"><div className="bg-orange-500 h-2 rounded-full w-[42%]"></div></div>
+                                </div>
+                            </div>
+                            <div className="mt-4 p-3 bg-orange-50 border border-orange-100 rounded-sm text-xs text-orange-700">
+                                <Icon name="AlertTriangle" size={12} className="inline mr-1" />
+                                尚有 <strong>18</strong> 笔流水存在金额差异，需工单查明后方可锁账。
+                            </div>
+                        </div>
+
+                        <div className="col-span-2 bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col">
+                            <div className="px-4 py-3 border-b border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                                <span className="text-sm font-bold text-gray-700">异常核销队列</span>
+                                <button className="text-xs border border-gray-300 px-3 py-1 rounded-sm hover:border-[#1890ff] hover:text-[#1890ff]">导出异常记录</button>
+                            </div>
+                            <div className="flex-1 overflow-auto">
+                                <table className="w-full text-sm text-center border-collapse">
+                                    <thead>
+                                        <tr className="bg-[#fafafa] text-gray-700 border-b border-gray-200">
+                                            <th className="p-3 border-r border-gray-200 font-normal">关联单据</th>
+                                            <th className="p-3 border-r border-gray-200 font-normal">业务类型</th>
+                                            <th className="p-3 border-r border-gray-200 font-normal">系统核算值</th>
+                                            <th className="p-3 border-r border-gray-200 font-normal">实际发生值</th>
+                                            <th className="p-3 border-r border-gray-200 font-normal">差异额</th>
+                                            <th className="p-3 font-normal">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+                                            <td className="p-3 border-r border-gray-200 font-mono text-xs">OD-202310-102</td>
+                                            <td className="p-3 border-r border-gray-200 text-gray-600">平台退款</td>
+                                            <td className="p-3 border-r border-gray-200">¥ 120.00</td>
+                                            <td className="p-3 border-r border-gray-200 text-red-500">¥ 0.00</td>
+                                            <td className="p-3 border-r border-gray-200 font-bold text-red-500">¥ 120.00</td>
+                                            <td className="p-3 text-[#1890ff] cursor-pointer hover:underline" onClick={() => openModal('人工调账', 'OD-202310-102')}>人工调账</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+                                            <td className="p-3 border-r border-gray-200 font-mono text-xs">SF-202310-01992</td>
+                                            <td className="p-3 border-r border-gray-200 text-gray-600">运费超重</td>
+                                            <td className="p-3 border-r border-gray-200">¥ 15.00</td>
+                                            <td className="p-3 border-r border-gray-200 text-orange-500">¥ 45.00</td>
+                                            <td className="p-3 border-r border-gray-200 font-bold text-orange-500">¥ -30.00</td>
+                                            <td className="p-3 text-[#1890ff] cursor-pointer hover:underline" onClick={() => openModal('运费申诉', 'SF-202310-01992')}>运费申诉</td>
+                                        </tr>
+                                        <tr className="border-b border-gray-100 bg-gray-50/50">
+                                            <td colSpan="6" className="p-8 text-gray-400 text-xs">
+                                                <Icon name="CheckCircle" size={24} className="mx-auto mb-2 text-green-500 opacity-50" />
+                                                其余 1284 笔流水已由系统自动匹配核销完毕。
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <ActionModal isOpen={modalConfig.isOpen} actionType={modalConfig.actionType} rowData={modalConfig.rowData} onClose={closeModal} />
+                </div>
+            );
+        };
+
+        const PageTemplate = ({ config, onViewDetail }) => {
+            const [filterExpanded, setFilterExpanded] = useState(true);
+            const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
+            const [modalConfig, setModalConfig] = useState({ isOpen: false, actionType: '', rowData: null });
+
+            const handleSort = (key) => {
+                let direction = 'asc';
+                if (sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
+                setSortConfig({ key, direction });
+            };
+
+            const sortedData = useMemo(() => {
+                if (!config || !config.data) return [];
+                let items = [...config.data];
+                if (sortConfig.key) {
+                    items.sort((a, b) => {
+                        const aVal = a[sortConfig.key];
+                        const bVal = b[sortConfig.key];
+                        if (typeof aVal === 'number' && typeof bVal === 'number') {
+                            return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                        }
+                        return sortConfig.direction === 'asc' 
+                            ? String(aVal || '').localeCompare(String(bVal || ''))
+                            : String(bVal || '').localeCompare(String(aVal || ''));
+                    });
+                }
+                return items;
+            }, [config, sortConfig]);
+
+            const handleAction = (type, rowData) => {
+                if (type === '查看' || type === '详情' || type === '明细' || type === '轨迹') {
+                    onViewDetail(rowData.id);
+                } else {
+                    setModalConfig({ isOpen: true, actionType: type, rowData });
+                }
+            };
+
+            return (
+                <div className="p-4 bg-[#f0f2f5] min-h-full relative flex flex-col">
+                    <div className="bg-white border border-gray-200 rounded-sm mb-4 shadow-sm">
+                        <div className="px-4 py-2 border-b border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                            <div className="flex items-center"><Icon name="Search" size={14} className="mr-2 text-gray-500" /><span className="text-sm text-gray-700 font-medium">高级检索</span></div>
+                            <button onClick={() => setFilterExpanded(!filterExpanded)} className="text-gray-500 hover:text-[#1890ff] flex items-center text-xs transition-colors">
+                                <Icon name={filterExpanded ? "ChevronUp" : "ChevronDown"} size={14} className="mr-1" />{filterExpanded ? '收起' : '展开'}
+                            </button>
+                        </div>
+                        {filterExpanded && (
+                            <div className="p-4 flex flex-wrap gap-6 items-center text-sm text-gray-600">
+                                {config.filters.map((filter, idx) => (
+                                    <div key={idx} className="flex items-center"><span className="mr-2">{filter}:</span><select className="border border-gray-300 rounded-sm px-2 py-1 w-40 outline-none focus:border-[#1890ff]"><option>全部</option></select></div>
+                                ))}
+                                <button className="px-4 py-1.5 bg-[#1890ff] text-white rounded-sm hover:bg-[#40a9ff] transition-colors shadow-sm">查询数据</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-sm shadow-sm flex-1 flex flex-col">
+                        <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-[#fafafa]">
+                            <div className="flex items-center text-sm text-gray-700 font-medium"><Icon name="List" size={14} className="mr-2 text-gray-500" />数据列表</div>
+                            <div className="flex space-x-2"><button className="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded-sm text-xs hover:border-[#1890ff] hover:text-[#1890ff] transition-colors">导出表格</button></div>
+                        </div>
+                        <div className="overflow-x-auto flex-1">
+                            <table className="w-full text-sm text-center border-collapse">
+                                <thead>
+                                    <tr className="bg-[#fafafa] text-gray-700 border-b border-gray-200">
+                                        <th className="p-3 w-12 border-r border-gray-200 font-normal"><input type="checkbox" className="border-gray-300" /></th>
+                                        {config.columns.map((col, idx) => (
+                                            <th key={idx} className={`p-3 border-r border-gray-200 font-bold last:border-r-0 ${col.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}`} onClick={() => col.sortable && handleSort(col.key)}>
+                                                <div className="flex items-center justify-center">
+                                                    {col.label}
+                                                    {col.sortable && (
+                                                        <span className="ml-1 flex flex-col text-gray-400">
+                                                            <Icon name="ArrowUp" size={10} className={sortConfig.key === col.key && sortConfig.direction === 'asc' ? 'text-[#1890ff]' : ''} />
+                                                            <Icon name="ArrowDown" size={10} className={sortConfig.key === col.key && sortConfig.direction === 'desc' ? 'text-[#1890ff] -mt-1' : '-mt-1'} />
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedData.map((row, idx) => (
+                                        <tr key={idx} className="hover:bg-blue-50/50 transition-colors border-b border-gray-100 last:border-b-0">
+                                            <td className="p-3 border-r border-gray-200"><input type="checkbox" className="border-gray-300" /></td>
+                                            {config.columns.map((col, colIdx) => {
+                                                let cellData = row[col.key];
+                                                if (col.isMoney) cellData = formatMoney(cellData);
+                                                if (col.key === 'status') return <td key={colIdx} className={`p-3 border-r border-gray-200 font-medium ${row.statusColor}`}>{cellData}</td>;
+                                                if (col.key === 'action') return (
+                                                    <td key={colIdx} className="p-3">
+                                                        <button onClick={() => handleAction(cellData, row)} className="text-[#1890ff] hover:text-white hover:bg-[#1890ff] border border-[#1890ff] px-3 py-1 rounded text-xs transition-colors shadow-sm">{cellData}</button>
+                                                    </td>
+                                                );
+                                                return <td key={colIdx} className={`p-3 border-r border-gray-200 text-gray-600 ${col.key==='date'||col.key==='id' ? 'font-mono text-xs':''}`}>{cellData}</td>;
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <ActionModal isOpen={modalConfig.isOpen} actionType={modalConfig.actionType} rowData={modalConfig.rowData} onClose={() => setModalConfig({ isOpen: false, actionType: '', rowData: null })} />
+                </div>
+            );
+        };
+
+        const CommodityListView = () => {
+            const [filterExpanded, setFilterExpanded] = useState(true);
+            const AxurePlaceholder = () => (
+                <div className="w-14 h-14 border border-gray-300 bg-gray-50 relative mx-auto overflow-hidden">
+                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none"><line x1="0" y1="0" x2="100%" y2="100%" stroke="#CBD5E1" strokeWidth="1" /><line x1="100%" y1="0" x2="0" y2="100%" stroke="#CBD5E1" strokeWidth="1" /></svg>
+                </div>
+            );
+            const AxureCheckbox = () => (
+                <div className="w-4 h-4 border border-teal-500 inline-flex items-center justify-center bg-white relative">
+                    <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10" stroke="#14B8A6" strokeWidth="1.5" /><line x1="10" y1="2" x2="2" y2="10" stroke="#14B8A6" strokeWidth="1.5" /></svg>
+                </div>
+            );
+
+            return (
+                <div className="p-4 bg-white min-h-full font-sans text-gray-700">
+                    <div className="border border-gray-200 mb-4 rounded-sm">
+                        <div className="px-4 py-2 border-b border-gray-200 bg-[#f9f9f9] flex justify-between items-center text-sm">
+                            <div className="flex items-center"><Icon name="Search" size={14} className="mr-2 text-gray-500" />筛选查询</div>
+                            <div className="flex space-x-3 items-center">
+                                <button onClick={() => setFilterExpanded(!filterExpanded)} className="text-gray-500 hover:text-gray-800 flex items-center text-xs">
+                                    <Icon name={filterExpanded ? "ChevronUp" : "ChevronDown"} size={14} className="mr-1" />{filterExpanded ? '收起筛选' : '展开筛选'}
+                                </button>
+                                <button className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded-sm hover:border-[#1890ff] text-xs">查询结果</button>
+                                <button className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded-sm hover:border-[#1890ff] text-xs">高级检索</button>
+                            </div>
+                        </div>
+                        {filterExpanded && (
+                            <div className="p-4 flex flex-wrap gap-6 items-center text-sm">
+                                <div className="flex items-center"><span className="mr-2 w-16 text-right">输入搜索:</span><input type="text" placeholder="名称/货号" className="border border-gray-300 rounded-sm px-2 py-1.5 w-48 outline-none focus:border-[#1890ff]" /></div>
+                                <div className="flex items-center"><span className="mr-2">商品分类:</span><select className="border border-gray-300 rounded-sm px-2 py-1.5 w-40 outline-none text-gray-500"><option>请选择商品分类</option></select></div>
+                                <div className="flex items-center"><span className="mr-2">商品品牌:</span><select className="border border-gray-300 rounded-sm px-2 py-1.5 w-40 outline-none text-gray-500"><option>请选择品牌</option></select></div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="border border-gray-200 rounded-sm">
+                        <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-[#f9f9f9] text-sm">
+                            <div className="flex items-center text-gray-700"><Icon name="List" size={14} className="mr-2 text-gray-500" />数据列表</div>
+                            <div className="flex space-x-2">
+                                <button className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded-sm hover:border-[#1890ff] text-xs">修改基本信息</button>
+                                <button className="px-3 py-1 bg-white border border-gray-300 text-gray-700 rounded-sm hover:border-[#1890ff] text-xs">修改商品详情</button>
+                                <select className="border border-gray-300 rounded-sm px-2 py-1 text-xs text-gray-500 outline-none"><option>显示条数</option></select>
+                            </div>
+                        </div>
+                        <table className="w-full text-sm text-center border-collapse">
+                            <thead>
+                                <tr className="bg-[#f9f9f9] text-gray-700 border-b border-gray-200 font-bold">
+                                    <th className="p-3 w-10 border-r border-gray-200"><input type="checkbox" className="border-gray-300" /></th>
+                                    <th className="p-3 border-r border-gray-200">编号</th>
+                                    <th className="p-3 border-r border-gray-200">商品图片</th>
+                                    <th className="p-3 border-r border-gray-200 text-left pl-6">商品</th>
+                                    <th className="p-3 border-r border-gray-200">价格/货号</th>
+                                    <th className="p-3 border-r border-gray-200">标签</th>
+                                    <th className="p-3 border-r border-gray-200">排序</th>
+                                    <th className="p-3 border-r border-gray-200">SKU库存</th>
+                                    <th className="p-3 border-r border-gray-200">销量</th>
+                                    <th className="p-3 border-r border-gray-200">审核状态</th>
+                                    <th className="p-3">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {MOCK_COMMODITY_DATA.map((row, idx) => (
+                                    <tr key={idx} className="hover:bg-blue-50/30 transition-colors border-b border-gray-200 text-gray-600">
+                                        <td className="p-3 border-r border-gray-200"><input type="checkbox" className="border-gray-300" /></td>
+                                        <td className="p-3 border-r border-gray-200">{row.id}</td>
+                                        <td className="p-3 border-r border-gray-200"><AxurePlaceholder /></td>
+                                        <td className="p-3 border-r border-gray-200 text-left pl-6 leading-relaxed"><p>{row.name}</p><p>品牌：{row.brand}</p></td>
+                                        <td className="p-3 border-r border-gray-200 leading-relaxed"><p>价格：¥{row.price}</p><p>货号：{row.sku}</p></td>
+                                        <td className="p-3 border-r border-gray-200 text-xs">
+                                            <div className="flex items-center justify-end mb-1 space-x-1 w-full"><span className="w-8 text-right">上架:</span><AxureCheckbox /></div>
+                                            <div className="flex items-center justify-end mb-1 space-x-1 w-full"><span className="w-8 text-right">新品:</span><AxureCheckbox /></div>
+                                            <div className="flex items-center justify-end space-x-1 w-full"><span className="w-8 text-right">推荐:</span><AxureCheckbox /></div>
+                                        </td>
+                                        <td className="p-3 border-r border-gray-200">{row.sort}</td>
+                                        <td className="p-3 border-r border-gray-200"><AxureCheckbox /></td>
+                                        <td className="p-3 border-r border-gray-200">{row.sales}</td>
+                                        <td className="p-3 border-r border-gray-200"><p className="mb-1">{row.status}</p><p className="text-teal-600 cursor-pointer hover:underline">审核详情</p></td>
+                                        <td className="p-3">
+                                            <div className="flex flex-col space-y-1 items-center">
+                                                <div className="flex space-x-2"><span className="text-teal-600 cursor-pointer hover:underline">查看</span><span className="text-teal-600 cursor-pointer hover:underline">编辑</span></div>
+                                                <div className="flex space-x-2"><span className="text-teal-600 cursor-pointer hover:underline">日志</span><span className="text-teal-600 cursor-pointer hover:underline">删除</span></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        };
+
+        const OrderAddView = () => {
+            const [isImporting, setIsImporting] = useState(false);
+            const [orderList, setOrderList] = useState([]);
+
+            const handleMockImport = () => {
+                setIsImporting(true);
+                setTimeout(() => {
+                    setOrderList([
+                        { id: 'TMP-001', customer: '张三', phone: '13800138000', sku: 'SKU-A001 (智能手机Pro)', qty: 2, amount: 10000.00, status: '校验通过', statusColor: 'text-green-500' },
+                        { id: 'TMP-002', customer: '李四', phone: '13900139000', sku: 'SKU-B002 (无线耳机)', qty: 1, amount: 300.00, status: '校验通过', statusColor: 'text-green-500' },
+                        { id: 'TMP-003', customer: '王五', phone: '13700137000', sku: 'SKU-X999 (未知商品)', qty: 5, amount: 0.00, status: '库存不足', statusColor: 'text-red-500' }
+                    ]);
+                    setIsImporting(false);
+                }, 800);
+            };
+
+            const handleRemove = (id) => setOrderList(orderList.filter(item => item.id !== id));
+
+            return (
+                <div className="p-4 bg-[#f0f2f5] min-h-full font-sans text-gray-700">
+                    <div className="bg-white border border-gray-200 rounded-sm mb-4 p-4 flex justify-between items-center shadow-sm">
+                        <div>
+                            <h2 className="text-base font-bold text-gray-800">订单批量导入与添加</h2>
+                            <p className="text-xs text-gray-500 mt-1">支持 Excel、CSV 格式文件导入，单次最多处理 5000 条记录。</p>
+                        </div>
+                        <div className="flex space-x-3">
+                            <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-sm hover:border-[#1890ff] hover:text-[#1890ff] text-sm transition-colors">下载标准模板</button>
+                            <button onClick={handleMockImport} className="px-4 py-2 bg-[#1890ff] text-white rounded-sm hover:bg-[#40a9ff] text-sm transition-colors flex items-center">
+                                <Icon name="Upload" size={16} className="mr-2" />{isImporting ? '解析中...' : '上传并导入文件'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-200 rounded-sm shadow-sm flex flex-col h-[calc(100vh-220px)]">
+                        <div className="px-4 py-3 border-b border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                            <span className="text-sm font-bold text-gray-700">待提交明细 ({orderList.length})</span>
+                            <button className="px-4 py-1.5 bg-teal-500 text-white text-sm rounded-sm hover:bg-teal-600 transition-colors">手工追加一行</button>
+                        </div>
+                        <div className="flex-1 overflow-auto">
+                            <table className="w-full text-sm text-center border-collapse">
+                                <thead>
+                                    <tr className="bg-[#fafafa] text-gray-700 border-b border-gray-200">
+                                        <th className="p-3 border-r border-gray-200 font-normal w-16">序号</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal">客户姓名</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal">手机号</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal">SKU明细</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal w-24">数量</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal">实付金额</th>
+                                        <th className="p-3 border-r border-gray-200 font-normal">校验状态</th>
+                                        <th className="p-3 font-normal w-16">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orderList.length === 0 ? (
+                                        <tr><td colSpan="8" className="p-10 text-gray-400">暂无数据，请导入文件或手工录入。</td></tr>
+                                    ) : orderList.map((row, index) => (
+                                        <tr key={row.id} className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                                            <td className="p-3 border-r border-gray-200 text-gray-500">{index + 1}</td>
+                                            <td className="p-3 border-r border-gray-200"><input type="text" defaultValue={row.customer} className="w-full text-center outline-none bg-transparent focus:text-[#1890ff]" /></td>
+                                            <td className="p-3 border-r border-gray-200"><input type="text" defaultValue={row.phone} className="w-full text-center outline-none bg-transparent focus:text-[#1890ff]" /></td>
+                                            <td className="p-3 border-r border-gray-200 text-left px-4">{row.sku}</td>
+                                            <td className="p-3 border-r border-gray-200"><input type="number" defaultValue={row.qty} className="w-full text-center outline-none bg-transparent border-b border-gray-300 focus:border-[#1890ff]" /></td>
+                                            <td className="p-3 border-r border-gray-200 font-mono text-gray-800">{formatMoney(row.amount)}</td>
+                                            <td className={`p-3 border-r border-gray-200 ${row.statusColor}`}>{row.status}</td>
+                                            <td className="p-3">
+                                                <button onClick={() => handleRemove(row.id)} className="text-gray-400 hover:text-red-500 flex items-center justify-center w-full transition-colors"><Icon name="Trash2" size={14} /></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="p-4 border-t border-gray-200 bg-[#fafafa] flex justify-between items-center">
+                            <span className="text-sm text-gray-500">检测到 {orderList.filter(o => o.status !== '校验通过').length} 条异常数据</span>
+                            <button className="px-6 py-2 bg-[#1890ff] text-white rounded-sm text-sm hover:bg-[#40a9ff] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" disabled={orderList.length === 0}>确认提交</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const DetailView = ({ id, onBack }) => (
+            <div className="p-4 bg-[#f0f2f5] min-h-full">
+                <div className="bg-white border border-gray-200 rounded-sm mb-4 shadow-sm">
+                    <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center bg-[#fafafa]">
+                        <span className="text-sm text-gray-700 font-bold">基本信息 <span className="ml-4 font-normal text-gray-500">业务单号: {id}</span></span>
+                        <button onClick={onBack} className="text-xs text-[#1890ff] border border-[#1890ff] px-4 py-1.5 rounded-sm hover:bg-blue-50 transition-colors">返回列表</button>
+                    </div>
+                    <div className="p-5 grid grid-cols-4 gap-y-6 text-sm">
+                        <div className="text-gray-500">业务关联方: <span className="text-gray-900 ml-2">核心供应商/客户</span></div>
+                        <div className="text-gray-500">结算方式: <span className="text-gray-900 ml-2">对公转账</span></div>
+                        <div className="text-gray-500">经办人: <span className="text-gray-900 ml-2">系统管理员</span></div>
+                        <div className="text-gray-500">创建时间: <span className="text-gray-900 ml-2">2023-10-01 14:00:00</span></div>
+                        <div className="col-span-4 border-t border-gray-100 pt-5 grid grid-cols-4">
+                            <div className="text-gray-500">流转状态: <span className="text-blue-600 ml-2 font-medium">节点已完结</span></div>
+                            <div className="text-gray-500 col-span-3">最后操作时间: <span className="text-gray-900 ml-2">2023-10-02 10:30:00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-sm shadow-sm">
+                    <div className="px-4 py-3 border-b border-gray-200 bg-[#fafafa]">
+                        <span className="text-sm text-gray-700 font-bold">业务数据明细</span>
+                    </div>
+                    <div className="p-4">
+                        <table className="w-full text-sm text-center border-collapse border border-gray-200">
+                            <thead>
+                                <tr className="bg-[#f9f9f9] text-gray-700 border-b border-gray-200">
+                                    <th className="p-3 border-r border-gray-200 font-medium">序号</th>
+                                    <th className="p-3 border-r border-gray-200 font-medium">标的物/SKU</th>
+                                    <th className="p-3 border-r border-gray-200 font-normal">规格属性</th>
+                                    <th className="p-3 border-r border-gray-200 font-normal">单价/基准</th>
+                                    <th className="p-3 border-r border-gray-200 font-normal">数量</th>
+                                    <th className="p-3 font-medium">金额小计</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors">
+                                    <td className="p-3 border-r border-gray-200 text-gray-500">1</td>
+                                    <td className="p-3 border-r border-gray-200 text-gray-900">SKU-A001 (智能手机Pro)</td>
+                                    <td className="p-3 border-r border-gray-200 text-gray-600">钛蓝 256G</td>
+                                    <td className="p-3 border-r border-gray-200 text-gray-600">¥ 300.00</td>
+                                    <td className="p-3 border-r border-gray-200 text-gray-900">100</td>
+                                    <td className="p-3 text-gray-900 font-medium">¥ 30,000.00</td>
+                                </tr>
+                                <tr className="bg-[#fafafa]">
+                                    <td colSpan="5" className="p-3 border-r border-gray-200 text-right font-medium text-gray-600">总计：</td>
+                                    <td className="p-3 text-red-600 font-bold font-mono">¥ 30,000.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Dashboard = () => (
+            <div className="p-6 bg-[#f0f2f5] min-h-full">
+                <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div className="bg-white p-4 border border-gray-200 rounded-sm">
+                        <div className="text-gray-500 text-xs mb-2">本月预计总收入</div>
+                        <div className="text-xl text-gray-800 mb-1">¥ 1,250,000</div>
+                        <div className="text-green-500 text-xs flex items-center"><Icon name="TrendingUp" size={12} className="mr-1" /> 12.5%</div>
+                    </div>
+                    <div className="bg-white p-4 border border-gray-200 rounded-sm">
+                        <div className="text-gray-500 text-xs mb-2">本月待付账款</div>
+                        <div className="text-xl text-gray-800 mb-1">¥ 850,000</div>
+                        <div className="text-gray-400 text-xs">含采购与物流</div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [currentUser, setCurrentUser] = useState(null);
+            
+            const visibleMenus = useMemo(() => {
+                if (!currentUser) return [];
+                const filterMenus = (menus) => menus.reduce((acc, menu) => {
+                    if (!menu.roles || menu.roles.includes(currentUser.id)) {
+                        const newMenu = { ...menu };
+                        if (newMenu.children) newMenu.children = filterMenus(newMenu.children);
+                        acc.push(newMenu);
+                    }
+                    return acc;
+                }, []);
+                return filterMenus(MENU_DATA);
+            }, [currentUser]);
+
+            const [expandedMenus, setExpandedMenus] = useState([]);
+            const [activeMenu, setActiveMenu] = useState('');
+            const [viewingDetailId, setViewingDetailId] = useState(null);
+
+            useEffect(() => {
+                if (currentUser) {
+                    setActiveMenu(currentUser.defaultMenu);
+                    if (currentUser.id === 'admin') setExpandedMenus(['procurement-root', 'procurement-apply-folder', 'procurement-apply-sub', 'finance-root', 'service-root', 'auth-root']);
+                    else if (currentUser.id === 'procurement') setExpandedMenus(['procurement-root', 'procurement-apply-folder', 'procurement-apply-sub']);
+                    else if (currentUser.id === 'warehouse') setExpandedMenus(['logistic-root', 'service-root']);
+                    else if (currentUser.id === 'finance') setExpandedMenus(['finance-root', 'service-root']);
+                }
+            }, [currentUser]);
+
+            if (!currentUser) return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
+
+            const toggleMenu = (id) => setExpandedMenus(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
+
+            const renderMenu = (items, level = 0) => items.map(item => {
+                const hasChildren = item.children && item.children.length > 0;
+                const isExpanded = expandedMenus.includes(item.id);
+                const isActive = activeMenu === item.id;
+                return (
+                    <div key={item.id}>
+                        <div 
+                            className={`flex items-center py-2.5 cursor-pointer text-sm border-l-2
+                                ${level === 0 ? 'text-gray-800 font-bold bg-[#fafafa] border-b border-gray-200 border-l-transparent' : 'text-gray-600 border-b border-transparent border-l-transparent'}
+                                ${isActive && !hasChildren ? 'text-[#1890ff] bg-blue-50/50 border-l-[#1890ff]' : 'hover:bg-gray-100'}
+                            `}
+                            style={{ paddingLeft: `${(level * 1.2) + 1}rem` }}
+                            onClick={() => {
+                                if (hasChildren) toggleMenu(item.id);
+                                else { setActiveMenu(item.id); setViewingDetailId(null); }
+                            }}
+                        >
+                            {hasChildren && <span className="mr-1 text-gray-400"><Icon name={isExpanded ? 'ChevronDown' : 'ChevronRight'} size={14}/></span>}
+                            {!hasChildren && <span className="w-4 mr-1"></span>}
+                            {item.icon && <Icon name={item.icon} size={14} className={`mr-2 ${isActive && !hasChildren ? 'text-[#1890ff]' : 'text-[#a1a7c5]'}`} />}
+                            {item.title}
+                        </div>
+                        {hasChildren && isExpanded && <div>{renderMenu(item.children, level + 1)}</div>}
+                    </div>
+                );
+            });
+
+            return (
+                <div className="flex h-screen bg-gray-100 font-sans text-gray-900 overflow-hidden">
+                    <aside className="w-[220px] bg-[#f9f9f9] border-r border-gray-200 flex flex-col z-10 overflow-hidden shadow-sm">
+                        <div className="h-14 flex items-center px-4 border-b border-gray-200 bg-[#2b333e] text-white shrink-0">
+                            <span className="text-sm font-bold tracking-wider">电商业财一体化平台</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto bg-[#f5f5f5] pb-10 custom-scrollbar">{renderMenu(visibleMenus)}</div>
+                    </aside>
+                    <main className="flex-1 flex flex-col min-w-0">
+                        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
+                            <div className="flex items-center text-gray-700 text-sm font-bold">
+                                <span className="w-1 h-3 bg-[#1890ff] mr-2 inline-block"></span>
+                                {activeMenu === 'commodity-list' ? '商品列表' : activeMenu === 'order-add' ? '添加订单' : activeMenu === 'recon' ? '全盘汇总与月底对账' : activeMenu === 'role-mgr' ? '角色权限配置' : (MODULE_CONFIGS[activeMenu]?.title || '系统面板')}
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                                <Icon name="User" size={14} className="mr-1" />
+                                <span className="mr-4 text-[#1890ff] font-medium">{currentUser.name}</span>
+                                <Icon name="LogOut" size={14} className="cursor-pointer hover:text-red-500 transition-colors" onClick={() => setCurrentUser(null)} />
+                            </div>
+                        </header>
+                        {viewingDetailId ? <DetailView id={viewingDetailId} onBack={() => setViewingDetailId(null)} /> : 
+                         activeMenu === 'dashboard' ? <Dashboard /> : 
+                         activeMenu === 'commodity-list' ? <CommodityListView /> : 
+                         activeMenu === 'order-add' ? <OrderAddView /> : 
+                         activeMenu === 'recon' ? <ReconSummaryView /> :
+                         activeMenu === 'role-mgr' ? <RoleManagerView /> :
+                         MODULE_CONFIGS[activeMenu] ? <PageTemplate config={MODULE_CONFIGS[activeMenu]} onViewDetail={setViewingDetailId} /> : 
+                         <div className="p-10 text-center text-gray-400">模块开发中</div>}
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
